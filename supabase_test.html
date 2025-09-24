@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Database Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .status {
+            padding: 20px 30px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-left: 4px solid #4f46e5;
+            padding-left: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4f46e5;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .results {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+        
+        .log-success {
+            background: #d1fae5;
+            border-left-color: #10b981;
+            color: #065f46;
+        }
+        
+        .log-error {
+            background: #fee2e2;
+            border-left-color: #ef4444;
+            color: #991b1b;
+        }
+        
+        .log-info {
+            background: #dbeafe;
+            border-left-color: #3b82f6;
+            color: #1e40af;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .admin-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .admin-section h3 {
+            color: #92400e;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .data-display {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .data-display h4 {
+            color: #374151;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        
+        .data-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .data-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .data-item-header {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .data-item-details {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .data-item-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-filed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-verified {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-unverified {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗄️ Supabase Test</h1>
+            <p>Simple database testing interface</p>
+        </div>
+        
+        <div id="connectionStatus" class="status info">
+            <div class="loading"></div> Connecting to database...
+        </div>
+        
+        <div class="content">
+            <!-- Database Stats -->
+            <div class="section">
+                <h2>📊 Database Status</h2>
+                <div id="databaseStats" class="stats-grid">
+                    <!-- Stats will be populated here -->
+                </div>
+            </div>
+            
+            <!-- Admin Controls -->
+            <div class="admin-section">
+                <h3>🔧 Quick Actions</h3>
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="seedDemoData()">🌱 Add Sample Data</button>
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
+                    <button class="btn" onclick="refreshStats()">🔄 Refresh Stats</button>
+                </div>
+            </div>
+            
+            <!-- Simple Test Forms -->
+            <div class="section">
+                <h2>👤 Test User Creation</h2>
+                <div class="form-group">
+                    <label for="userName">Name:</label>
+                    <input type="text" id="userName" placeholder="Enter name">
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">Email:</label>
+                    <input type="email" id="userEmail" placeholder="Enter email">
+                </div>
+                <div class="button-group">
+                    <button class="btn" onclick="createUser()">➕ Create User</button>
+                    <button class="btn" onclick="getAllUsers()">👥 View Users</button>
+                </div>
+                <div id="usersData" class="data-display"></div>
+            </div>
+            
+            <div class="section">
+                <h2>💰 Test Income Entry</h2>
+                <div class="form-group">
+                    <label for="incomeAmount">Amount:</label>
+                    <input type="number" id="incomeAmount" placeholder="Enter amount" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="incomeType">Type:</label>
+                    <select id="incomeType">
+                        <option value="Salary">Salary</option>
+                        <option value="Business">Business</option>
+                        <option value="House Property">House Property</option>
+                        <option value="Capital Gains">Capital Gains</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button class="btn" onclick="addIncome()">➕ Add Income</button>
+                    <button class="btn" onclick="getIncome()">📊 View Income</button>
+                </div>
+                <div id="incomeData" class="data-display"></div>
+            </div>
+            
+            <div class="section">
+                <h2>📋 Test Tax Returns</h2>
+                <div class="form-group">
+                    <label for="taxFinancialYear">Financial Year:</label>
+                    <input type="number" id="taxFinancialYear" placeholder="2024" value="2024">
+                </div>
+                <div class="form-group">
+                    <label for="totalIncome">Total Income:</label>
+                    <input type="number" id="totalIncome" placeholder="Enter total income" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="taxableIncome">Taxable Income:</label>
+                    <input type="number" id="taxableIncome" placeholder="Enter taxable income" step="0.01">
+                </div>
+                <div class="button-group">
+                    <button class="btn" onclick="createTaxReturn()">📄 Create Tax Return</button>
+                    <button class="btn" onclick="getTaxReturns()">📊 View Tax Returns</button>
+                </div>
+                <div id="taxReturnsData" class="data-display"></div>
+            </div>
+            
+            <div class="section">
+                <h2>💰 Test Deductions</h2>
+                <div class="form-group">
+                    <label for="deductionSection">Section Code:</label>
+                    <input type="text" id="deductionSection" placeholder="e.g., 80C, 80D">
+                </div>
+                <div class="form-group">
+                    <label for="deductionAmount">Amount:</label>
+                    <input type="number" id="deductionAmount" placeholder="Enter deduction amount" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="deductionYear">Financial Year:</label>
+                    <input type="number" id="deductionYear" placeholder="2024" value="2024">
+                </div>
+                <div class="button-group">
+                    <button class="btn" onclick="addDeduction()">➕ Add Deduction</button>
+                    <button class="btn" onclick="getDeductions()">📊 View Deductions</button>
+                </div>
+                <div id="deductionsData" class="data-display"></div>
+            </div>
+            
+            <div class="section">
+                <h2>📋 Test Notifications</h2>
+                <div class="form-group">
+                    <label for="notificationMessage">Message:</label>
+                    <textarea id="notificationMessage" placeholder="Enter notification message" rows="3"></textarea>
+                </div>
+                <div class="button-group">
+                    <button class="btn" onclick="createNotification()">🔔 Send Notification</button>
+                    <button class="btn" onclick="getNotifications()">📬 View Notifications</button>
+                </div>
+                <div id="notificationsData" class="data-display"></div>
+            </div>
+            
+            <div class="section">
+                <h2>📚 Return History & Payments</h2>
+                <div class="button-group">
+                    <button class="btn" onclick="getReturnHistory()">📜 View Return History</button>
+                    <button class="btn" onclick="getPayments()">💳 View Payments</button>
+                    <button class="btn" onclick="getRefunds()">💰 View Refunds</button>
+                    <button class="btn" onclick="getPenalties()">⚠️ View Penalties</button>
+                </div>
+                <div id="historyData" class="data-display"></div>
+            </div>
+            
+            <!-- Results -->
+            <div class="section">
+                <h2>📝 Activity Log</h2>
+                <div id="results" class="results">
+                    Ready to test database operations...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://mehhdssgpwzmnawjjozr.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1laGhkc3NncHd6bW5hd2pqb3pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzMTUwNDYsImV4cCI6MjA3Mzg5MTA0Nn0.IRnsEnUW0BcfAGqMj0PDynpiLusNV576gCJA0TlVE8c';
+        
+        let supabase;
+        let currentUserId = null;
+
+        // Initialize Supabase
+        async function initSupabase() {
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                // Test connection
+                const { data, error } = await supabase.from('roles').select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                document.getElementById('connectionStatus').innerHTML = '✅ Connected to Supabase successfully!';
+                document.getElementById('connectionStatus').className = 'status success';
+                
+                // Load stats
+                await refreshStats();
+                
+            } catch (error) {
+                console.error('Supabase connection error:', error);
+                document.getElementById('connectionStatus').innerHTML = `❌ Connection failed: ${error.message}`;
+                document.getElementById('connectionStatus').className = 'status error';
+            }
+        }
+
+        // Refresh database statistics
+        async function refreshStats() {
+            try {
+                const tables = [
+                    { name: 'users', label: 'Users' },
+                    { name: 'roles', label: 'Roles' },
+                    { name: 'income_sources', label: 'Income' },
+                    { name: 'tax_returns', label: 'Tax Returns' },
+                    { name: 'notifications', label: 'Notifications' },
+                    { name: 'payments', label: 'Payments' }
+                ];
+                
+                let html = '';
+                
+                for (const table of tables) {
+                    try {
+                        const { count, error } = await supabase
+                            .from(table.name)
+                            .select('*', { count: 'exact', head: true });
+                        
+                        if (error) throw error;
+                        
+                        html += `
+                            <div class="stat-card">
+                                <div class="stat-number">${count || 0}</div>
+                                <div class="stat-label">${table.label}</div>
+                            </div>
+                        `;
+                    } catch (err) {
+                        html += `
+                            <div class="stat-card">
+                                <div class="stat-number">-</div>
+                                <div class="stat-label">${table.label}</div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                document.getElementById('databaseStats').innerHTML = html;
+                
+            } catch (error) {
+                logResult(`Error refreshing stats: ${error.message}`, 'error');
+            }
+        }
+
+        // Seed demo data
+        async function seedDemoData() {
+            try {
+                logResult('🌱 Adding sample data...', 'info');
+                
+                // Create roles first
+                const { data: roleData, error: roleError } = await supabase
+                    .from('roles')
+                    .insert([
+                        { name: 'admin', description: 'Administrator' },
+                        { name: 'user', description: 'Regular user' }
+                    ])
+                    .select();
+                
+                if (roleError) throw roleError;
+                logResult(`✅ Created ${roleData.length} roles`, 'success');
+                
+                // Create demo user
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .insert([
+                        {
+                            name: 'Demo User',
+                            email: 'demo@example.com',
+                            phone: '+1234567890',
+                            password_hash: 'demo123',
+                            role_id: roleData[0].role_id,
+                            is_verified: true,
+                            is_active: true
+                        }
+                    ])
+                    .select();
+                
+                if (userError) throw userError;
+                currentUserId = userData[0].user_id;
+                logResult(`✅ Created demo user: ${userData[0].name}`, 'success');
+                
+                // Create sample income
+                const { data: incomeData, error: incomeError } = await supabase
+                    .from('income_sources')
+                    .insert([
+                        {
+                            user_id: currentUserId,
+                            source_type: 'Salary',
+                            amount: 50000,
+                            financial_year: 2024,
+                            description: 'Monthly salary'
+                        }
+                    ])
+                    .select();
+                
+                if (incomeError) throw incomeError;
+                logResult(`✅ Added income: $${incomeData[0].amount}`, 'success');
+                
+                // Create notification
+                const { data: notifData, error: notifError } = await supabase
+                    .from('notifications')
+                    .insert([
+                        {
+                            user_id: currentUserId,
+                            message: 'Welcome to the system!',
+                            type: 'General'
+                        }
+                    ])
+                    .select();
+                
+                if (notifError) throw notifError;
+                logResult(`✅ Created notification`, 'success');
+                
+                await refreshStats();
+                logResult('🎉 Sample data added successfully!', 'success');
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Clear all data
+        async function clearAllData() {
+            if (!confirm('⚠️ This will delete ALL data. Continue?')) {
+                return;
+            }
+            
+            try {
+                logResult('🗑️ Clearing all data...', 'info');
+                
+                const tables = [
+                    'notifications', 'otp_verification', 'login_logs', 'penalties',
+                    'audits', 'payments', 'refunds', 'tax_returns', 'deductions',
+                    'income_sources', 'users', 'roles'
+                ];
+                
+                for (const table of tables) {
+                    const { error } = await supabase.from(table).delete().neq('created_at', '1900-01-01');
+                    if (!error) {
+                        logResult(`✅ Cleared ${table}`, 'success');
+                    }
+                }
+                
+                currentUserId = null;
+                await refreshStats();
+                logResult('🎉 All data cleared!', 'success');
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Create user
+        async function createUser() {
+            try {
+                const name = document.getElementById('userName').value;
+                const email = document.getElementById('userEmail').value;
+                
+                if (!name || !email) {
+                    logResult('❌ Please fill in name and email', 'error');
+                    return;
+                }
+                
+                // Get first available role
+                const { data: roles, error: roleError } = await supabase
+                    .from('roles')
+                    .select('role_id')
+                    .limit(1);
+                
+                if (roleError) throw roleError;
+                
+                if (!roles || roles.length === 0) {
+                    logResult('❌ No roles found. Click "Add Sample Data" first.', 'error');
+                    return;
+                }
+                
+                const { data, error } = await supabase
+                    .from('users')
+                    .insert([
+                        {
+                            name,
+                            email,
+                            password_hash: 'password123',
+                            role_id: roles[0].role_id,
+                            is_verified: false,
+                            is_active: true
+                        }
+                    ])
+                    .select();
+                
+                if (error) throw error;
+                
+                currentUserId = data[0].user_id;
+                logResult(`✅ User created: ${data[0].name}`, 'success');
+                await refreshStats();
+                
+                // Clear form
+                document.getElementById('userName').value = '';
+                document.getElementById('userEmail').value = '';
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Get all users
+        async function getAllUsers() {
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('name, email, is_verified, created_at, phone, is_active');
+                
+                if (error) throw error;
+                
+                logResult(`👥 Found ${data.length} users:`, 'info');
+                
+                let html = `<h4>👥 Users (${data.length})</h4>`;
+                if (data.length === 0) {
+                    html += '<div class="data-item"><div class="data-item-details">No users found</div></div>';
+                } else {
+                    data.forEach(user => {
+                        const status = user.is_verified ? 'status-verified' : 'status-unverified';
+                        const statusText = user.is_verified ? 'Verified' : 'Not Verified';
+                        const activeText = user.is_active ? 'Active' : 'Inactive';
+                        const createdDate = new Date(user.created_at).toLocaleDateString();
+                        
+                        html += `
+                            <div class="data-item">
+                                <div class="data-item-header">${user.name}</div>
+                                <div class="data-item-details">
+                                    <strong>Email:</strong> ${user.email}<br>
+                                    <strong>Phone:</strong> ${user.phone || 'Not provided'}<br>
+                                    <strong>Status:</strong> <span class="data-item-status ${status}">${statusText}</span> | ${activeText}<br>
+                                    <strong>Created:</strong> ${createdDate}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('usersData').innerHTML = html;
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Add income
+        async function addIncome() {
+            try {
+                if (!currentUserId) {
+                    logResult('❌ Please create a user first', 'error');
+                    return;
+                }
+                
+                const amount = parseFloat(document.getElementById('incomeAmount').value);
+                const sourceType = document.getElementById('incomeType').value;
+                
+                if (!amount) {
+                    logResult('❌ Please enter an amount', 'error');
+                    return;
+                }
+                
+                const { data, error } = await supabase
+                    .from('income_sources')
+                    .insert([
+                        {
+                            user_id: currentUserId,
+                            source_type: sourceType,
+                            amount,
+                            financial_year: 2024,
+                            description: `${sourceType} income`
+                        }
+                    ])
+                    .select();
+                
+                if (error) throw error;
+                
+                logResult(`✅ Added income: ${sourceType} - $${amount}`, 'success');
+                await refreshStats();
+                
+                // Clear form
+                document.getElementById('incomeAmount').value = '';
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Get income
+        async function getIncome() {
+            try {
+                const { data, error } = await supabase
+                    .from('income_sources')
+                    .select('source_type, amount, financial_year, description, created_at');
+                
+                if (error) throw error;
+                
+                logResult(`💰 Found ${data.length} income sources:`, 'info');
+                
+                let html = `<h4>💰 Income Sources (${data.length})</h4>`;
+                if (data.length === 0) {
+                    html += '<div class="data-item"><div class="data-item-details">No income sources found</div></div>';
+                } else {
+                    data.forEach(income => {
+                        const createdDate = new Date(income.created_at).toLocaleDateString();
+                        html += `
+                            <div class="data-item">
+                                <div class="data-item-header">${income.source_type}</div>
+                                <div class="data-item-details">
+                                    <strong>Amount:</strong> $${income.amount.toLocaleString()}<br>
+                                    <strong>Financial Year:</strong> ${income.financial_year}<br>
+                                    <strong>Description:</strong> ${income.description || 'No description'}<br>
+                                    <strong>Added:</strong> ${createdDate}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('incomeData').innerHTML = html;
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Create notification
+        async function createNotification() {
+            try {
+                if (!currentUserId) {
+                    logResult('❌ Please create a user first', 'error');
+                    return;
+                }
+                
+                const message = document.getElementById('notificationMessage').value;
+                
+                if (!message) {
+                    logResult('❌ Please enter a message', 'error');
+                    return;
+                }
+                
+                const { data, error } = await supabase
+                    .from('notifications')
+                    .insert([
+                        {
+                            user_id: currentUserId,
+                            message,
+                            type: 'General'
+                        }
+                    ])
+                    .select();
+                
+                if (error) throw error;
+                
+                logResult(`✅ Notification sent: "${message}"`, 'success');
+                await refreshStats();
+                
+                // Clear form
+                document.getElementById('notificationMessage').value = '';
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Get notifications
+        async function getNotifications() {
+            try {
+                const { data, error } = await supabase
+                    .from('notifications')
+                    .select('message, type, status, created_at');
+                
+                if (error) throw error;
+                
+                logResult(`📬 Found ${data.length} notifications:`, 'info');
+                data.forEach(notif => {
+                    const status = notif.status === 'Read' ? '✅' : '📩';
+                    logResult(`${status} [${notif.type}] ${notif.message}`, 'info');
+                });
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Log results
+        function logResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            resultsDiv.appendChild(logEntry);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // Create tax return
+        async function createTaxReturn() {
+            try {
+                if (!currentUserId) {
+                    logResult('❌ Please create a user first', 'error');
+                    return;
+                }
+                
+                const financialYear = parseInt(document.getElementById('taxFinancialYear').value);
+                const totalIncome = parseFloat(document.getElementById('totalIncome').value);
+                const taxableIncome = parseFloat(document.getElementById('taxableIncome').value);
+                
+                if (!financialYear || !totalIncome || !taxableIncome) {
+                    logResult('❌ Please fill in all required fields', 'error');
+                    return;
+                }
+                
+                const taxLiability = Math.max(0, taxableIncome * 0.1); // Simple 10% tax
+                
+                const { data, error } = await supabase
+                    .from('tax_returns')
+                    .insert([
+                        {
+                            user_id: currentUserId,
+                            financial_year: financialYear,
+                            total_income: totalIncome,
+                            taxable_income: taxableIncome,
+                            tax_liability: taxLiability,
+                            status: 'Filed'
+                        }
+                    ])
+                    .select();
+                
+                if (error) throw error;
+                
+                logResult(`✅ Tax return created: FY ${financialYear} - Tax: $${taxLiability}`, 'success');
+                await refreshStats();
+                
+                // Clear form
+                document.getElementById('taxFinancialYear').value = '2024';
+                document.getElementById('totalIncome').value = '';
+                document.getElementById('taxableIncome').value = '';
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Get tax returns
+        async function getTaxReturns() {
+            try {
+                const { data, error } = await supabase
+                    .from('tax_returns')
+                    .select('financial_year, total_income, taxable_income, tax_liability, status, created_at');
+                
+                if (error) throw error;
+                
+                logResult(`📊 Found ${data.length} tax returns:`, 'info');
+                
+                let html = `<h4>📊 Tax Returns (${data.length})</h4>`;
+                if (data.length === 0) {
+                    html += '<div class="data-item"><div class="data-item-details">No tax returns found</div></div>';
+                } else {
+                    data.forEach(return_data => {
+                        const status = return_data.status === 'Filed' ? 'status-filed' : 'status-pending';
+                        const createdDate = new Date(return_data.created_at).toLocaleDateString();
+                        
+                        html += `
+                            <div class="data-item">
+                                <div class="data-item-header">FY ${return_data.financial_year} Tax Return</div>
+                                <div class="data-item-details">
+                                    <strong>Total Income:</strong> $${return_data.total_income.toLocaleString()}<br>
+                                    <strong>Taxable Income:</strong> $${return_data.taxable_income.toLocaleString()}<br>
+                                    <strong>Tax Liability:</strong> $${return_data.tax_liability.toLocaleString()}<br>
+                                    <strong>Status:</strong> <span class="data-item-status ${status}">${return_data.status}</span><br>
+                                    <strong>Filed:</strong> ${createdDate}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('taxReturnsData').innerHTML = html;
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Add deduction
+        async function addDeduction() {
+            try {
+                if (!currentUserId) {
+                    logResult('❌ Please create a user first', 'error');
+                    return;
+                }
+                
+                const sectionCode = document.getElementById('deductionSection').value;
+                const amount = parseFloat(document.getElementById('deductionAmount').value);
+                const financialYear = parseInt(document.getElementById('deductionYear').value);
+                
+                if (!sectionCode || !amount || !financialYear) {
+                    logResult('❌ Please fill in all required fields', 'error');
+                    return;
+                }
+                
+                const { data, error } = await supabase
+                    .from('deductions')
+                    .insert([
+                        {
+                            user_id: currentUserId,
+                            section_code: sectionCode,
+                            amount,
+                            financial_year: financialYear
+                        }
+                    ])
+                    .select();
+                
+                if (error) throw error;
+                
+                logResult(`✅ Deduction added: ${sectionCode} - $${amount}`, 'success');
+                await refreshStats();
+                
+                // Clear form
+                document.getElementById('deductionSection').value = '';
+                document.getElementById('deductionAmount').value = '';
+                document.getElementById('deductionYear').value = '2024';
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Get deductions
+        async function getDeductions() {
+            try {
+                const { data, error } = await supabase
+                    .from('deductions')
+                    .select('section_code, amount, financial_year, created_at');
+                
+                if (error) throw error;
+                
+                logResult(`💰 Found ${data.length} deductions:`, 'info');
+                
+                let html = `<h4>💰 Deductions (${data.length})</h4>`;
+                if (data.length === 0) {
+                    html += '<div class="data-item"><div class="data-item-details">No deductions found</div></div>';
+                } else {
+                    data.forEach(deduction => {
+                        const createdDate = new Date(deduction.created_at).toLocaleDateString();
+                        
+                        html += `
+                            <div class="data-item">
+                                <div class="data-item-header">Section ${deduction.section_code}</div>
+                                <div class="data-item-details">
+                                    <strong>Amount:</strong> $${deduction.amount.toLocaleString()}<br>
+                                    <strong>Financial Year:</strong> ${deduction.financial_year}<br>
+                                    <strong>Added:</strong> ${createdDate}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('deductionsData').innerHTML = html;
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Get return history
+        async function getReturnHistory() {
+            try {
+                const { data, error } = await supabase
+                    .from('tax_returns')
+                    .select('financial_year, total_income, tax_liability, status, filing_date, created_at')
+                    .order('financial_year', { ascending: false });
+                
+                if (error) throw error;
+                
+                logResult(`📜 Found ${data.length} tax returns in history:`, 'info');
+                
+                let html = `<h4>📜 Return History (${data.length})</h4>`;
+                if (data.length === 0) {
+                    html += '<div class="data-item"><div class="data-item-details">No return history found</div></div>';
+                } else {
+                    data.forEach(return_data => {
+                        const status = return_data.status === 'Filed' ? 'status-filed' : 'status-pending';
+                        const filingDate = return_data.filing_date ? new Date(return_data.filing_date).toLocaleDateString() : 'Not filed';
+                        const createdDate = new Date(return_data.created_at).toLocaleDateString();
+                        
+                        html += `
+                            <div class="data-item">
+                                <div class="data-item-header">FY ${return_data.financial_year} Return</div>
+                                <div class="data-item-details">
+                                    <strong>Total Income:</strong> $${return_data.total_income.toLocaleString()}<br>
+                                    <strong>Tax Liability:</strong> $${return_data.tax_liability.toLocaleString()}<br>
+                                    <strong>Status:</strong> <span class="data-item-status ${status}">${return_data.status}</span><br>
+                                    <strong>Filing Date:</strong> ${filingDate}<br>
+                                    <strong>Created:</strong> ${createdDate}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('historyData').innerHTML = html;
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Get payments
+        async function getPayments() {
+            try {
+                const { data, error } = await supabase
+                    .from('payments')
+                    .select('amount, payment_date, method, status, transaction_id, created_at');
+                
+                if (error) throw error;
+                
+                logResult(`💳 Found ${data.length} payments:`, 'info');
+                
+                let html = `<h4>💳 Payments (${data.length})</h4>`;
+                if (data.length === 0) {
+                    html += '<div class="data-item"><div class="data-item-details">No payments found</div></div>';
+                } else {
+                    data.forEach(payment => {
+                        const status = payment.status === 'Paid' ? 'status-paid' : 'status-pending';
+                        const paymentDate = payment.payment_date ? new Date(payment.payment_date).toLocaleDateString() : 'Not paid';
+                        const createdDate = new Date(payment.created_at).toLocaleDateString();
+                        
+                        html += `
+                            <div class="data-item">
+                                <div class="data-item-header">${payment.method} Payment</div>
+                                <div class="data-item-details">
+                                    <strong>Amount:</strong> $${payment.amount.toLocaleString()}<br>
+                                    <strong>Status:</strong> <span class="data-item-status ${status}">${payment.status}</span><br>
+                                    <strong>Payment Date:</strong> ${paymentDate}<br>
+                                    <strong>Transaction ID:</strong> ${payment.transaction_id || 'Not provided'}<br>
+                                    <strong>Created:</strong> ${createdDate}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('historyData').innerHTML = html;
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Get refunds
+        async function getRefunds() {
+            try {
+                const { data, error } = await supabase
+                    .from('refunds')
+                    .select('amount, issued_date, status, created_at');
+                
+                if (error) throw error;
+                
+                logResult(`💰 Found ${data.length} refunds:`, 'info');
+                
+                let html = `<h4>💰 Refunds (${data.length})</h4>`;
+                if (data.length === 0) {
+                    html += '<div class="data-item"><div class="data-item-details">No refunds found</div></div>';
+                } else {
+                    data.forEach(refund => {
+                        const status = refund.status === 'Completed' ? 'status-paid' : 'status-pending';
+                        const issuedDate = refund.issued_date ? new Date(refund.issued_date).toLocaleDateString() : 'Not issued';
+                        const createdDate = new Date(refund.created_at).toLocaleDateString();
+                        
+                        html += `
+                            <div class="data-item">
+                                <div class="data-item-header">Refund #${refund.refund_id.substring(0, 8)}</div>
+                                <div class="data-item-details">
+                                    <strong>Amount:</strong> $${refund.amount.toLocaleString()}<br>
+                                    <strong>Status:</strong> <span class="data-item-status ${status}">${refund.status}</span><br>
+                                    <strong>Issued Date:</strong> ${issuedDate}<br>
+                                    <strong>Created:</strong> ${createdDate}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('historyData').innerHTML = html;
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Get penalties
+        async function getPenalties() {
+            try {
+                const { data, error } = await supabase
+                    .from('penalties')
+                    .select('reason, amount, imposed_date, status, created_at');
+                
+                if (error) throw error;
+                
+                logResult(`⚠️ Found ${data.length} penalties:`, 'info');
+                
+                let html = `<h4>⚠️ Penalties (${data.length})</h4>`;
+                if (data.length === 0) {
+                    html += '<div class="data-item"><div class="data-item-details">No penalties found</div></div>';
+                } else {
+                    data.forEach(penalty => {
+                        const status = penalty.status === 'Paid' ? 'status-paid' : 'status-pending';
+                        const imposedDate = penalty.imposed_date ? new Date(penalty.imposed_date).toLocaleDateString() : 'Not imposed';
+                        const createdDate = new Date(penalty.created_at).toLocaleDateString();
+                        
+                        html += `
+                            <div class="data-item">
+                                <div class="data-item-header">Penalty #${penalty.penalty_id.substring(0, 8)}</div>
+                                <div class="data-item-details">
+                                    <strong>Amount:</strong> $${penalty.amount.toLocaleString()}<br>
+                                    <strong>Reason:</strong> ${penalty.reason}<br>
+                                    <strong>Status:</strong> <span class="data-item-status ${status}">${penalty.status}</span><br>
+                                    <strong>Imposed Date:</strong> ${imposedDate}<br>
+                                    <strong>Created:</strong> ${createdDate}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                document.getElementById('historyData').innerHTML = html;
+                
+            } catch (error) {
+                logResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initSupabase);
+    </script>
+</body>
+</html>

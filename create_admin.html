@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Admin User - ITMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .admin-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .admin-header {
+            margin-bottom: 30px;
+        }
+
+        .admin-header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .admin-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .admin-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .credentials-display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            display: none;
+        }
+
+        .credentials-display h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .credential-item {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .credential-item:last-child {
+            border-bottom: none;
+        }
+
+        .credential-label {
+            font-weight: 600;
+            color: #555;
+            display: inline-block;
+            width: 120px;
+        }
+
+        .credential-value {
+            color: #333;
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: background 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <a href="simple_frontend.html" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Main App
+    </a>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <div class="admin-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h1>Create Admin User</h1>
+            <p>Set up administrator access for your ITMS project</p>
+        </div>
+
+        <form id="adminForm">
+            <div class="form-group">
+                <label for="adminName">Admin Name:</label>
+                <input type="text" id="adminName" value="ADMIN USER" required>
+            </div>
+
+            <div class="form-group">
+                <label for="adminEmail">Email Address:</label>
+                <input type="email" id="adminEmail" value="admin@itms.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="adminPhone">Phone Number:</label>
+                <input type="tel" id="adminPhone" value="9876543210" required>
+            </div>
+
+            <div class="form-group">
+                <label for="adminPAN">PAN Number:</label>
+                <input type="text" id="adminPAN" value="ADMIN1234A" required>
+            </div>
+
+            <div class="form-group">
+                <label for="adminAadhaar">Aadhaar Number:</label>
+                <input type="text" id="adminAadhaar" value="123456789012" required>
+            </div>
+
+            <div class="form-group">
+                <label for="adminAddress">Address:</label>
+                <input type="text" id="adminAddress" value="Admin Office, ITMS Building" required>
+            </div>
+
+            <div class="form-group">
+                <label for="adminCity">City:</label>
+                <input type="text" id="adminCity" value="Mumbai" required>
+            </div>
+
+            <div class="form-group">
+                <label for="adminState">State:</label>
+                <input type="text" id="adminState" value="Maharashtra" required>
+            </div>
+
+            <div class="form-group">
+                <label for="adminPinCode">PIN Code:</label>
+                <input type="text" id="adminPinCode" value="400001" required>
+            </div>
+
+            <div class="form-group">
+                <label for="adminPassword">Password:</label>
+                <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+                <small style="color: #666; font-size: 0.9rem; margin-top: 5px; display: block;">
+                    Password must be at least 8 characters long
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm admin password" required>
+            </div>
+
+            <button type="submit" class="btn" id="createBtn">
+                <i class="fas fa-user-plus"></i> Create Admin User
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Creating admin user...</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i>
+            <strong>Admin user created successfully!</strong>
+            <p>You can now use these credentials to access admin features.</p>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <strong>Error creating admin user!</strong>
+            <p id="errorText"></p>
+        </div>
+
+        <div class="credentials-display" id="credentialsDisplay">
+            <h3><i class="fas fa-key"></i> Admin Credentials</h3>
+            <div class="credential-item">
+                <span class="credential-label">User ID:</span>
+                <span class="credential-value" id="userId"></span>
+            </div>
+            <div class="credential-item">
+                <span class="credential-label">Name:</span>
+                <span class="credential-value" id="userName"></span>
+            </div>
+            <div class="credential-item">
+                <span class="credential-label">Email:</span>
+                <span class="credential-value" id="userEmail"></span>
+            </div>
+            <div class="credential-item">
+                <span class="credential-label">Phone:</span>
+                <span class="credential-value" id="userPhone"></span>
+            </div>
+            <div class="credential-item">
+                <span class="credential-label">Role:</span>
+                <span class="credential-value">ADMIN</span>
+            </div>
+            <div class="credential-item">
+                <span class="credential-label">Password:</span>
+                <span class="credential-value" id="userPassword"></span>
+            </div>
+            <div class="credential-item">
+                <span class="credential-label">Status:</span>
+                <span class="credential-value">ACTIVE & VERIFIED</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase configuration - Replace with your actual credentials
+        const SUPABASE_URL = 'https://mehhdssgpwzmnawjjozr.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1laGhkc3NncHd6bW5hd2pqb3pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzMTUwNDYsImV4cCI6MjA3Mzg5MTA0Nn0.IRnsEnUW0BcfAGqMj0PDynpiLusNV576gCJA0TlVE8c';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        document.getElementById('adminForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const createBtn = document.getElementById('createBtn');
+            const loading = document.getElementById('loading');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const credentialsDisplay = document.getElementById('credentialsDisplay');
+            
+            // Hide previous messages
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            credentialsDisplay.style.display = 'none';
+            
+            // Show loading
+            createBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                // Get form data
+                const password = document.getElementById('adminPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                // Validate passwords
+                if (password.length < 8) {
+                    throw new Error('Password must be at least 8 characters long');
+                }
+                
+                if (password !== confirmPassword) {
+                    throw new Error('Passwords do not match');
+                }
+                
+                const formData = {
+                    name: document.getElementById('adminName').value,
+                    email: document.getElementById('adminEmail').value,
+                    phone: document.getElementById('adminPhone').value,
+                    pan: document.getElementById('adminPAN').value,
+                    aadhaar: document.getElementById('adminAadhaar').value,
+                    address: document.getElementById('adminAddress').value,
+                    city: document.getElementById('adminCity').value,
+                    state: document.getElementById('adminState').value,
+                    pin_code: document.getElementById('adminPinCode').value,
+                    password: password
+                };
+
+                // First, check if admin role exists
+                const { data: adminRole, error: roleError } = await supabase
+                    .from('roles')
+                    .select('role_id')
+                    .eq('name', 'admin')
+                    .single();
+
+                let roleId;
+                if (roleError || !adminRole) {
+                    // Create admin role if it doesn't exist
+                    const { data: newRole, error: createRoleError } = await supabase
+                        .from('roles')
+                        .insert([{
+                            name: 'admin',
+                            description: 'Administrator role with full access',
+                            permissions: ['read', 'write', 'delete', 'admin']
+                        }])
+                        .select('role_id')
+                        .single();
+
+                    if (createRoleError) throw createRoleError;
+                    roleId = newRole.role_id;
+                } else {
+                    roleId = adminRole.role_id;
+                }
+
+                // Check if admin user already exists
+                const { data: existingAdmin } = await supabase
+                    .from('users')
+                    .select('user_id')
+                    .eq('email', formData.email)
+                    .single();
+
+                if (existingAdmin) {
+                    throw new Error(`Admin user already exists with email: ${formData.email}`);
+                }
+
+                // Create admin user with authentication
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: formData.email,
+                    password: formData.password,
+                    options: {
+                        data: {
+                            name: formData.name,
+                            phone: formData.phone,
+                            pan: formData.pan,
+                            aadhaar: formData.aadhaar,
+                            address: formData.address,
+                            city: formData.city,
+                            state: formData.state,
+                            pin_code: formData.pin_code,
+                            is_admin: true
+                        }
+                    }
+                });
+
+                if (authError) throw authError;
+
+                // Generate a simple password hash (in production, use proper hashing)
+                const passwordHash = btoa(formData.password + 'salt'); // Simple base64 encoding with salt
+
+                // Create user profile in users table
+                const { data: newAdmin, error: userError } = await supabase
+                    .from('users')
+                    .insert([{
+                        user_id: authData.user.id,
+                        name: formData.name,
+                        email: formData.email,
+                        phone: formData.phone,
+                        pan: formData.pan,
+                        aadhaar: formData.aadhaar,
+                        address: formData.address,
+                        city: formData.city,
+                        state: formData.state,
+                        pin_code: formData.pin_code,
+                        password_hash: passwordHash,
+                        role_id: roleId,
+                        is_active: true,
+                        is_verified: true,
+                        is_admin: true,
+                        last_login: new Date().toISOString()
+                    }])
+                    .select('user_id, name, email, phone')
+                    .single();
+
+                if (userError) throw userError;
+
+                // Show success message and credentials
+                loading.style.display = 'none';
+                successMessage.style.display = 'block';
+                credentialsDisplay.style.display = 'block';
+                
+                // Populate credentials display
+                document.getElementById('userId').textContent = newAdmin.user_id;
+                document.getElementById('userName').textContent = newAdmin.name;
+                document.getElementById('userEmail').textContent = newAdmin.email;
+                document.getElementById('userPhone').textContent = newAdmin.phone;
+                document.getElementById('userPassword').textContent = formData.password;
+
+                // Reset form
+                createBtn.disabled = false;
+
+            } catch (error) {
+                console.error('Error creating admin user:', error);
+                
+                loading.style.display = 'none';
+                errorMessage.style.display = 'block';
+                document.getElementById('errorText').textContent = error.message;
+                createBtn.disabled = false;
+            }
+        });
+
+        // Auto-fill form with default values on page load
+        window.addEventListener('load', function() {
+            console.log('Admin creation page loaded');
+        });
+    </script>
+</body>
+</html>
